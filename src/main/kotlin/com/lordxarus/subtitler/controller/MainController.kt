@@ -1,5 +1,9 @@
-package com.lordxarus.subtitler.app
+package com.lordxarus.subtitler.controller
 
+import com.lordxarus.subtitler.app.Status
+import com.lordxarus.subtitler.app.SubtitleGrabber
+import com.lordxarus.subtitler.app.SubtitleItem
+import com.lordxarus.subtitler.app.SubtitleItemModel
 import tornadofx.*
 
 class MainController : Controller() {

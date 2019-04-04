@@ -1,6 +1,10 @@
 package com.lordxarus.subtitler.view
 
-import com.lordxarus.subtitler.app.*
+import com.lordxarus.subtitler.app.MyStyles
+import com.lordxarus.subtitler.app.Status
+import com.lordxarus.subtitler.app.SubtitleGrabber
+import com.lordxarus.subtitler.app.SubtitleItem
+import com.lordxarus.subtitler.controller.MainController
 import javafx.scene.control.ListView
 import javafx.scene.control.SelectionMode
 import javafx.stage.FileChooser

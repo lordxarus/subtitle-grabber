@@ -21,33 +21,22 @@ object SubtitleGrabber {
     }
 
     fun getSubtitle(title: String, file: File): Boolean {
-        if (file.isDirectory) {
-            file.listFiles().filter{ f: File -> file.absolutePath != f.absolutePath }.forEach {
-                val id = parseTitle(title, it)
-                val info = osClient.searchSubtitles("eng", id.title, id.season, id.episode)
-                if (info.isNotEmpty()) {
-                    download(info[0].downloadLink, "${id.title} S${id.season}E${id.episode}")
-                    return true
-                }
-            }
-        } else {
             val id = parseTitle(title, file)
             val info = osClient.searchSubtitles("eng", id.title, id.season, id.episode)
             if (info.isNotEmpty()) {
                 download(info[0].downloadLink, "${id.title} S${id.season}E${id.episode}")
                 return true
             }
-        }
         return false
     }
 
     fun parseTitle(title: String, file: File) : SubID {
         val split = file.name.split(".")
         var episode : String = ""
-        split.forEachIndexed { index: Int, string: String ->
-            if (string.toLowerCase().startsWith("s") && string.length > 1) {
-                if ("0123456789".contains(string[1])) {
-                    episode = string.toLowerCase()
+        split.forEach {
+            if (it.toLowerCase().startsWith("s") && it.length > 1) {
+                if ("0123456789".contains(it[1])) {
+                    episode = it.toLowerCase()
                 }
             }
         }
