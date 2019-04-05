@@ -1,7 +1,10 @@
 package com.lordxarus.subtitler.app
 
 import com.github.wtekiela.opensub4j.impl.OpenSubtitlesClientImpl
+import org.jsoup.Connection
+import org.jsoup.Jsoup
 import org.slf4j.LoggerFactory
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -15,19 +18,20 @@ object SubtitleGrabber {
     private val serverURL = URL("https", "api.opensubtitles.org", 443, "/xml-rpc")
     private val osClient = OpenSubtitlesClientImpl(serverURL)
     private val logger = LoggerFactory.getLogger(SubtitleGrabber.javaClass)
+    private var cookies: Map<String, String> = mapOf()
+    private val addictedURL = "https://www.addic7ed.com"
 
     init {
        osClient.login("en", "TemporaryUserAgent")
     }
 
     fun getSubtitle(title: String, file: File): Boolean {
-            val id = parseTitle(title, file)
-            val info = osClient.searchSubtitles("eng", id.title, id.season, id.episode)
-            if (info.isNotEmpty()) {
-                download(info[0].downloadLink, "${id.title} S${id.season}E${id.episode}")
-                return true
-            }
-        return false
+        val id = parseTitle(title, file)
+        return if (!getSubtitleOpenSubs(id, file)) {
+            getSubtitleAddicted(id, file)
+        } else {
+            true
+        }
     }
 
     fun parseTitle(title: String, file: File) : SubID {
@@ -44,7 +48,7 @@ object SubtitleGrabber {
         return SubID(title, episodeArr[0].replace("s", ""), episodeArr[1])
     }
 
-    private fun download(url: String, name: String) {
+    private fun download(url: String, name: String, extract: Boolean = true) {
         val byteChannel = Channels.newChannel(URL(url).openStream())
         val fos = FileOutputStream("/tmp/$name")
         val fileChannel = fos.channel
@@ -52,7 +56,7 @@ object SubtitleGrabber {
         fos.close()
         fileChannel.close()
         byteChannel.close()
-        extract(name)
+        if (extract) extract(name)
         File("/tmp/$name").delete()
     }
 
@@ -79,6 +83,40 @@ object SubtitleGrabber {
 
     fun logout() {
         if (osClient.isLoggedIn) osClient.logout()
+    }
+
+    private fun getSubtitleAddicted(id: SubID, file: File) : Boolean {
+        if (cookies.isEmpty()) {
+            val response = Jsoup.connect("$addictedURL/dologin.php").data("username", "lordxarus").data("password", "WowBadPassword").method(Connection.Method.POST).execute()
+            cookies = response.cookies()
+        }
+
+        val response = Jsoup.connect("$addictedURL/search.php").cookies(cookies).data("search", id.fullName).method(Connection.Method.GET).execute()
+        val elements = response.parse().getElementsByClass("buttonDownload")
+        println(elements)
+        if (elements.isNotEmpty()) {
+            elements.forEachIndexed { index, element ->
+                if (index == 0) {
+                    println("$addictedURL${element.attr("href")}")
+                    val fileRes = Jsoup.connect("$addictedURL${element.attr("href")}").cookies(cookies).header("Referer", response.url().toString()).ignoreContentType(true).execute().bodyAsBytes()
+                    val out = BufferedOutputStream(FileOutputStream(file.name.replaceAfterLast(".", "") + "srt"))
+                    out.write(fileRes)
+                    out.close()
+                    // download("$addictedURL${it.attr("href")}", file.name, true)
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private fun getSubtitleOpenSubs(id: SubID, file: File): Boolean {
+        val info = osClient.searchSubtitles("eng", id.title, id.season, id.episode)
+        if (info.isNotEmpty()) {
+            download(info[0].downloadLink, file.name)
+            return true
+        }
+        return false
     }
 
 }

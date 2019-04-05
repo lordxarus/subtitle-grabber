@@ -60,7 +60,7 @@ class SubtitleItemModel: ItemViewModel<SubtitleItem>() {
 
 }
 
-data class SubID(val title: String, val season: String, val episode: String)
+data class SubID(val title: String, val season: String, val episode: String, val fullName: String = "$title S${season}E$episode")
 
 enum class Status(color: Color) {
     UNKNOWN(Color.WHITE), FAILED(Color.RED), COMPLETE(Color.GREEN)

@@ -14,14 +14,6 @@ class MyStyles : Stylesheet() {
 
     init {
 
-        listView {
-            listCell {
-                and(odd) {
-                    backgroundColor += Color.CORNSILK
-                }
-            }
-        }
-
         completedCell {
             backgroundColor += Color.GREEN
             wrapText = true
