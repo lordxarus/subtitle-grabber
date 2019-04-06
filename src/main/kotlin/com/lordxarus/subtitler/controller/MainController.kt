@@ -28,7 +28,7 @@ class MainController : Controller() {
         subs.remove(sub)
     }
 
-    fun setComplete(sub: SubtitleItem) {
+    fun download(sub: SubtitleItem) {
         model.itemProperty.set(sub)
         val result = SubtitleGrabber.getSubtitle(model.title.value, model.file.value)
         if (result) {

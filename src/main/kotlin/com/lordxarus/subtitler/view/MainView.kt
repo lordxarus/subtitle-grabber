@@ -33,7 +33,7 @@ class MainView : View("Subtitler!") {
                         removeClass(MyStyles.failedCell)
                         addClass(MyStyles.completedCell)
                     }
-                } else if (this.item.complete == Status.FAILED){
+                } else if (this.item.complete == Status.FAILED) {
                     if (!hasClass(MyStyles.failedCell)) {
                         addClass(MyStyles.failedCell)
                     }
@@ -48,7 +48,7 @@ class MainView : View("Subtitler!") {
             button("+") {
                 enableWhen { model.title.isNotBlank() }
                 action {
-                    val files = chooseFile(mode = FileChooserMode.Multi, title = "Select Target Directory / Files", filters =  arrayOf(FileChooser.ExtensionFilter("Video files", "*.mkv")))
+                    val files = chooseFile(mode = FileChooserMode.Multi, title = "Select Target Directory / Files", filters = arrayOf(FileChooser.ExtensionFilter("Video files", "*.mkv")))
                     if (files.isNotEmpty()) {
                         files.forEach {
                             controller.addSub(SubtitleItem(SubtitleGrabber.parseTitle(model.title.value, it), it))
@@ -61,7 +61,9 @@ class MainView : View("Subtitler!") {
             button("-") {
                 enableWhen(listView.selectionModel?.selectedItemProperty()?.isNotNull!!)
                 action {
-                    controller.removeSub(listView.selectionModel?.selectedItemProperty()?.value!!)
+                    listView.selectionModel.selectedItems.forEach {
+                        controller.removeSub(it)
+                    }
                 }
             }
 
@@ -69,10 +71,15 @@ class MainView : View("Subtitler!") {
                 enableWhen { controller.subs.sizeProperty.greaterThan(0) }
                 action {
                     model.commit()
-                    listView.items.forEach {
-                        controller.setComplete(it)
+                    runAsync {
+                        listView.items.forEach {
+                            controller.download(it)
+                            listView.refresh()
+                        }
+                    } ui {
+
                     }
-                    listView.refresh()
+
                 }
 
             }
@@ -82,10 +89,10 @@ class MainView : View("Subtitler!") {
             required()
         }
 
-            paddingAll = 10.0
-            spacing = 10.0
-        }
+        paddingAll = 10.0
+        spacing = 10.0
     }
+}
 
 
 
