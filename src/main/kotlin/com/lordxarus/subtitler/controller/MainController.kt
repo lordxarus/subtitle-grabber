@@ -1,10 +1,8 @@
 package com.lordxarus.subtitler.controller
 
-import com.lordxarus.subtitler.app.Status
-import com.lordxarus.subtitler.app.SubtitleGrabber
-import com.lordxarus.subtitler.app.SubtitleItem
-import com.lordxarus.subtitler.app.SubtitleItemModel
+import com.lordxarus.subtitler.app.*
 import tornadofx.*
+import java.io.File
 
 class MainController : Controller() {
 
@@ -15,17 +13,25 @@ class MainController : Controller() {
     init {
 
         // Dummy data
-        //addSub(SubtitleItem(SubID("King of the Hill", "01", "01"), File("/run/media/jeremy/Torrents/tv/King.of.the.Hill.S01-S13.COMPLETE.WEB-DL.H.264-MiXED/King.of.the.Hill.S01.480p.WEB-DL.AAC2.0.H.264-SA89/King.of.the.Hill.S01E01.Pilot.480p.WEB-DL.AAC2.0.H.264-SA89.mkv")))
+        addSub(SubtitleItem(SubID("King of the Hill", "01", "01"), File("/run/media/jeremy/Torrents/tv/King.of.the.Hill.S01-S13.COMPLETE.WEB-DL.H.264-MiXED/King.of.the.Hill.S01.480p.WEB-DL.AAC2.0.H.264-SA89/King.of.the.Hill.S01E01.Pilot.480p.WEB-DL.AAC2.0.H.264-SA89.mkv")))
+        addSub(SubtitleItem(SubID("King of the Hill", "01", "02"), File("/run/media/jeremy/Torrents/tv/King.of.the.Hill.S01-S13.COMPLETE.WEB-DL.H.264-MiXED/King.of.the.Hill.S01.480p.WEB-DL.AAC2.0.H.264-SA89/King.of.the.Hill.S01E02.Square.Pig.480p.WEB-DL.AAC2.0.H.264-SA89.mkv")))
+        addSub(SubtitleItem(SubID("King of the Hill", "01", "03"), File("/run/media/jeremy/Torrents/tv/King.of.the.Hill.S01-S13.COMPLETE.WEB-DL.H.264-MiXED/King.of.the.Hill.S01.480p.WEB-DL.AAC2.0.H.264-SA89/King.of.the.Hill.S01E03.The.Order.of.the.Straight.Arrow.480p.WEB-DL.AAC2.0.H.264-SA89.mkv")))
 
-        SubtitleGrabber
+        runAsync {
+            SubtitleGrabber
+        }
     }
 
     fun addSub(sub: SubtitleItem){
         subs.add(sub)
     }
 
-    fun removeSub(sub: SubtitleItem) {
+    fun removeAllSubs(sub: SubtitleItem) {
         subs.remove(sub)
+    }
+
+    fun removeAllSubs(sub: SortedFilteredList<SubtitleItem>) {
+        subs.removeAll(sub)
     }
 
     fun download(sub: SubtitleItem) {

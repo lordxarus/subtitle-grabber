@@ -5,6 +5,7 @@ import com.lordxarus.subtitler.app.Status
 import com.lordxarus.subtitler.app.SubtitleGrabber
 import com.lordxarus.subtitler.app.SubtitleItem
 import com.lordxarus.subtitler.controller.MainController
+import javafx.collections.ListChangeListener
 import javafx.scene.control.ListView
 import javafx.scene.control.SelectionMode
 import javafx.stage.FileChooser
@@ -16,6 +17,7 @@ class MainView : View("Subtitler!") {
 
     private var model = controller.model
     private var listView: ListView<SubtitleItem> by singleAssign()
+    private var lastSelected = SortedFilteredList<SubtitleItem>()
 
     override val root = vbox {
 
@@ -25,6 +27,16 @@ class MainView : View("Subtitler!") {
             selectionModel.selectionMode = SelectionMode.MULTIPLE
 
             bindSelected(model)
+
+            selectionModel.selectedItems.addListener { listener: ListChangeListener.Change<out SubtitleItem>->
+                lastSelected.clear()
+                listener.list.forEach {
+                    if (it != null) {
+                        println("SELECTED ${it.name}")
+                        lastSelected.add(it)
+                    }
+                }
+            }
 
             cellFormat {
                 text = item.name
@@ -59,11 +71,9 @@ class MainView : View("Subtitler!") {
             }
 
             button("-") {
-                enableWhen(listView.selectionModel?.selectedItemProperty()?.isNotNull!!)
+                enableWhen(lastSelected.sizeProperty.isNotEqualTo(0))
                 action {
-                    listView.selectionModel.selectedItems.forEach {
-                        controller.removeSub(it)
-                    }
+                    controller.removeAllSubs(lastSelected)
                 }
             }
 
@@ -76,8 +86,6 @@ class MainView : View("Subtitler!") {
                             controller.download(it)
                             listView.refresh()
                         }
-                    } ui {
-
                     }
 
                 }
